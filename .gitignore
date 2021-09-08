@@ -18,8 +18,6 @@
 ############
 # VS stuff #
 ############
-*.sln
-*.csproj
 appsettings*
 .vs/*
 UpgradeLog.XML
