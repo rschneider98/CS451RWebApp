@@ -59,6 +59,7 @@ TestResults/
 ######################
 *.log
 *.sqlite
+*.xlsx
 
 ######################
 # OS generated files #
