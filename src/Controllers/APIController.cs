@@ -53,13 +53,12 @@ namespace CS451RWebApp.Controllers
                 using var reader = await cmd.ExecuteReaderAsync();
 
                 Console.WriteLine(Environment.NewLine + "Retrieving data from database..." + Environment.NewLine);
-                string pattern = "{{{0},{1},{2},{3},{4},{5}}}";
+                string pattern = "{{\"songName\":\"{0}\",\"artistName\":\"{1}\",\"albumName\":\"{2}\",\"songID\":{3},\"artistID\":{4},\"albumID\":{5}}}";
                 bool first = true;
 
                 //check if there are records
                 while (await reader.ReadAsync())
                 {
-                    first = false;
                     songName = reader.GetString(0);
                     artistName = reader.GetString(1);
                     albumName = reader.GetString(2);
@@ -68,8 +67,9 @@ namespace CS451RWebApp.Controllers
                     albumID = reader.GetInt32(5);
 
                     //display retrieved record
+                    if (!first) { output += ","; }
                     output += string.Format(pattern, songName, artistName, albumName, songID.ToString(), artistID.ToString(), albumID.ToString());
-                    if (first) { output += ","; }
+                    first = false;
                 }
                 output += "]";
             }
