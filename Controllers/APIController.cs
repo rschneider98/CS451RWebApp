@@ -2,29 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 
-// For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
 namespace CS451RWebApp.Controllers 
 {
-    //set the connection string
-    public static class DBInfo
-    {
-        public const string connString = @"server=raspberrypi;database=music_library; 
-                                            uid=rbs;pwd=KnightsTables;";
-    }        
-
     [Route("api/transactions")]
     [ApiController]
     public class TransactionsController : ControllerBase 
     {
+        private readonly IConfiguration _configuration;
+        public TransactionsController(IConfiguration configuration)
+        {
+            _configuration = configuration;
+        }
         // GET: api/<TransactionsController>/
         // Multiple Parameters
         [HttpGet()]
         public async Task<string> GetAsync(string id) 
         {
+            string connString = this._configuration.GetConnectionString("localDB");
             //variables to store the query results
             string output = "[";
             string songName, artistName, albumName;
@@ -33,7 +32,7 @@ namespace CS451RWebApp.Controllers
             try
             {
                 //sql connection object
-                using var conn = new MySqlConnection(DBInfo.connString);
+                using var conn = new MySqlConnection(connString);
 
                 //retrieve the SQL Server instance version
                 string query = @"SELECT song.songName, artist.artistName, album.albumName, song.songID, artist.artistID, album.albumID
@@ -81,24 +80,6 @@ namespace CS451RWebApp.Controllers
 
 
             return output;
-        }
-
-        // POST api/<TransactionsController>
-        [HttpPost]
-        public void Post([FromBody] string value)
-        {
-        }
-
-        // PUT api/<TransactionsController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<TransactionsController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
         }
     }
 }

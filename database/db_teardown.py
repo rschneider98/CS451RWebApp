@@ -5,15 +5,19 @@ import mysql
 import sqlalchemy as sql
 from sqlalchemy.sql import text
 from sqlalchemy.exc import IntegrityError
+import json
 
 # SET ENVIRONMENT VARIABLES FOR DB
-# since this will be run at the same location as DB these are formatted for local connections to DB
-#host = "127.0.0.1"  # localhost
-host = "raspberrypi"
-port = 3306         # local port
-# DO NOT hard-code this
-dbuser = os.environ.get("DB_USER")
-pwd = os.environ.get("DB_PWD") 
+with open("../appsettings.Development.json", "r") as f:
+    config = json.load(f)
+conn_str = config["ConnectionStrings"]["localDB"]
+conn_elements = {item[0]: item[1] for item in [line.split("=") for line in conn_str.split(";")]}
+
+host = conn_elements["server"]
+port = 3306         # standard port
+dbuser = conn_elements["uid"]
+pwd = conn_elements["pwd"]
+dbname = "banking"
 
 # create SQL engine for DB
 engine = sql.create_engine(f'mysql+mysqlconnector://{dbuser}:{pwd}@{host}:{port}')
@@ -26,5 +30,3 @@ try:
         connection.execute(query)
 except IntegrityError:
     print("Failed to delette database")
-
-
