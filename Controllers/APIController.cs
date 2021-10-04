@@ -5,29 +5,52 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 
 namespace CS451RWebApp.Controllers 
 {
-    [Route("api/transactions")]
+    [Route("api/getTransactionHistory")]
     [ApiController]
     public class TransactionsController : ControllerBase 
     {
         private readonly IConfiguration _configuration;
+        private class Transaction
+        {
+            public int TransactionID { get; set; }
+            public int TimeMonth { get; set; }
+            public int TimeDay { get; set; }
+            public int TimeYear { get; set; }
+            public int AmountDollars { get; set; }
+            public int AmountCents { get; set; }
+            public int EndBalanceDollars { get; set; }
+            public int EndBalanceCents { get; set; }
+            public string Vendor { get; set; }
+        }
+
+        private class TransactionHistory
+        {
+            public List<Transaction> Transactions { get; set; }
+            public TransactionHistory()
+            {
+                Transactions = new List<Transaction>();
+            }
+        }
+
         public TransactionsController(IConfiguration configuration)
         {
             _configuration = configuration;
         }
-        // GET: api/<TransactionsController>/
-        // Multiple Parameters
-        [HttpGet()]
-        public async Task<string> GetAsync(string id) 
+
+
+        [HttpGet]
+        public async Task<string> GetAsync(string ID) 
         {
             string connString = this._configuration.GetConnectionString("localDB");
             //variables to store the query results
-            string output = "[";
-            string songName, artistName, albumName;
-            int songID, artistID, albumID;
+            string output;
+            TransactionHistory history = new TransactionHistory();
 
             try
             {
@@ -35,51 +58,45 @@ namespace CS451RWebApp.Controllers
                 using var conn = new MySqlConnection(connString);
 
                 //retrieve the SQL Server instance version
-                string query = @"SELECT song.songName, artist.artistName, album.albumName, song.songID, artist.artistID, album.albumID
-                                    FROM song
-                                    LEFT JOIN artist ON song.artistID = artist.artistID
-                                    INNER JOIN album ON song.albumID = album.albumID WHERE song.songName LIKE @p;
-                                     ";
+                string query = @"SELECT TransactionID, TimeMonth, TimeDay, TimeYear, AmountDollars, AmountCents, EndBalanceDollars, EndBalanceCents, Vendor
+                                FROM transaction
+                                WHERE AccountID = @ID;";
 
                 //open connection
                 await conn.OpenAsync();
 
                 //define the SqlCommand object and execute
                 using var cmd = new MySqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@p", string.Format("%{0}%", id));
+                cmd.Parameters.AddWithValue("@ID", ID);
 
                 // using var cmd = new MySqlCommand(query, conn);
                 using var reader = await cmd.ExecuteReaderAsync();
-
                 Console.WriteLine(Environment.NewLine + "Retrieving data from database..." + Environment.NewLine);
-                string pattern = "{{\"songName\":\"{0}\",\"artistName\":\"{1}\",\"albumName\":\"{2}\",\"songID\":{3},\"artistID\":{4},\"albumID\":{5}}}";
-                bool first = true;
 
                 //check if there are records
                 while (await reader.ReadAsync())
                 {
-                    songName = reader.GetString(0);
-                    artistName = reader.GetString(1);
-                    albumName = reader.GetString(2);
-                    songID = reader.GetInt32(3);
-                    artistID = reader.GetInt32(4);
-                    albumID = reader.GetInt32(5);
 
-                    //display retrieved record
-                    if (!first) { output += ","; }
-                    output += string.Format(pattern, songName, artistName, albumName, songID.ToString(), artistID.ToString(), albumID.ToString());
-                    first = false;
+                    history.Transactions.Add(new Transaction()
+                    {
+                        TransactionID = reader.GetInt32(0),
+                        TimeMonth = reader.GetInt32(1),
+                        TimeDay = reader.GetInt32(2),
+                        TimeYear = reader.GetInt32(3),
+                        AmountDollars = reader.GetInt32(4),
+                        AmountCents = reader.GetInt32(5),
+                        EndBalanceDollars = reader.GetInt32(6),
+                        EndBalanceCents = reader.GetInt32(7),
+                        Vendor = reader.GetString(8),
+                    });
                 }
-                output += "]";
+                output = JsonSerializer.Serialize(history);
+                return output;
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                //display error message
-                Console.WriteLine("Exception: " + ex.Message);
+                return e.Message;
             }
-
-
-            return output;
         }
     }
 }
