@@ -1,6 +1,6 @@
 # Schmea Definition for Relational Database
 
-## USERS
+## USER
 Identify users of our services.
 
 | Field | Type | Other |
@@ -20,7 +20,7 @@ Tie our user information to protected information. This is a separate table to r
 | UserID | unsigned int(255) | Primary Key |
 | SSN | unsigned int(255) | NA |
 
-## NOTIFICATIONS
+## NOTIFICATION
 This would define the types of notification rules users can select from, describe the rule for the user, and provide a function name that actually implements the queries.
 
 | Field | Type | Other |
@@ -30,7 +30,7 @@ This would define the types of notification rules users can select from, describ
 | Description | string(256) | NA |
 
 
-## USER_NOTIFICATIONS
+## USER_NOTIFICATION
 This should include entries to enable notification functions for users.
 
 | Field | Type | Other |
@@ -39,7 +39,7 @@ This should include entries to enable notification functions for users.
 | FnName | string(64) | NA |
 
 
-## ACCOUNTS
+## ACCOUNT
 This would tie our users to the accounts that they have ownership of.
 
 | Field | Type | Other |
@@ -64,16 +64,16 @@ This would tie accounts to indivdual transactions
 | Field | Type | Other |
 | -- | -- | -- |
 | TransactionID | unsigned int(255) | Primary Key |
-| AccountID | unsigned int(255) | Indexed |
-| Year | unsigned smallint(255) | Indexed |
-| Month | unsigned smallint(255) | Indexed |
+| AccountID | unsigned int(255) | Foreign Key |
+| Year | unsigned smallint(255) | NA |
+| Month | unsigned smallint(255) | NA |
 | Timestamp | VARCHAR(25) | NA |
 | Amount | DECIMAL(16, 2) | NA |
 | LocationAddress | VARCHAR(50) | NA |
 | LocationCity | VARCHAR(50) | NA |
 | LocationStCd | VARCHAR(2) | NA |
 | LocationCtnyCd | VARCHAR(5) | NA |
-| Vendor | VARCHAR(100) | NA |
+| Vendor | VARCHAR(100) | Foreign Key |
 
 ## CATEGORY
 List and description of transaction categories

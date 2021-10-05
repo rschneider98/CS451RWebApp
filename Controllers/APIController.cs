@@ -1,21 +1,37 @@
 ﻿using System;
+using System.IO;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-
 
 namespace CS451RWebApp.Controllers 
 {
-    [Route("api/getTransactionHistory")]
     [ApiController]
-    public class TransactionsController : ControllerBase 
+    public class BackendController : ControllerBase
     {
         private readonly IConfiguration _configuration;
+        private readonly ILogger _logger;
+
+        public BackendController(IConfiguration configuration, ILogger<BackendController> logger)
+        {
+            _configuration = configuration;
+            _logger = logger;
+        }
+
+        public static bool IsEmpty<T>(List<T> list)
+        {
+            if (list == null)
+            {
+                return true;
+            }
+
+            return !list.Any();
+        }
+
         private class Transaction
         {
             public int TransactionID { get; set; }
@@ -38,18 +54,16 @@ namespace CS451RWebApp.Controllers
             }
         }
 
-        public TransactionsController(IConfiguration configuration)
+        public class RequestID
         {
-            _configuration = configuration;
+            public string ID { get; set; }
         }
 
-
-        [HttpGet]
-        public async Task<string> GetAsync(string ID) 
+        [HttpPost]
+        [Route("api/getTransactionHistory")]
+        public async Task<ActionResult> GetAsyncTransactionHistory([FromBody] RequestID body) 
         {
             string connString = this._configuration.GetConnectionString("localDB");
-            //variables to store the query results
-            string output;
             TransactionHistory history = new TransactionHistory();
 
             try
@@ -58,20 +72,19 @@ namespace CS451RWebApp.Controllers
                 using var conn = new MySqlConnection(connString);
 
                 //retrieve the SQL Server instance version
-                string query = @"SELECT TransactionID, TimeMonth, TimeDay, TimeYear, AmountDollars, AmountCents, EndBalanceDollars, EndBalanceCents, Vendor
-                                FROM transaction
-                                WHERE AccountID = @ID;";
+                string filePath = $"sql{Path.DirectorySeparatorChar}getTransactionHistory.sql";
+                string query = System.IO.File.ReadAllText(filePath);
 
                 //open connection
                 await conn.OpenAsync();
 
                 //define the SqlCommand object and execute
                 using var cmd = new MySqlCommand(query, conn);
-                cmd.Parameters.AddWithValue("@ID", ID);
+                cmd.Parameters.AddWithValue("@ID", body.ID);
 
                 // using var cmd = new MySqlCommand(query, conn);
                 using var reader = await cmd.ExecuteReaderAsync();
-                Console.WriteLine(Environment.NewLine + "Retrieving data from database..." + Environment.NewLine);
+                _logger.LogInformation(string.Format("Retrieving TransactionHistory for ID={0} from database.", body.ID));
 
                 //check if there are records
                 while (await reader.ReadAsync())
@@ -90,13 +103,19 @@ namespace CS451RWebApp.Controllers
                         Vendor = reader.GetString(8),
                     });
                 }
-                output = JsonSerializer.Serialize(history);
-                return output;
             }
             catch (Exception e)
             {
-                return e.Message;
+                _logger.LogError(e.Message);
+                return Problem("Error accessing database, contact site admin for more info");
             }
+
+            if (IsEmpty(history.Transactions))
+            {
+                return NotFound(string.Format("Account {0} does not exist", body.ID));
+            }
+
+            return Ok(history);
         }
     }
 }

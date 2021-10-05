@@ -1,5 +1,0 @@
-# Documentation
-
-## API
-### Endpoints
-- Transactions

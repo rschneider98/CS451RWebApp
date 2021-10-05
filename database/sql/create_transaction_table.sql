@@ -1,4 +1,4 @@
-CREATE TABLE transaction (
+CREATE TABLE transactions (
     TransactionID int unsigned NOT NULL AUTO_INCREMENT PRIMARY KEY,
     AccountID int unsigned NOT NULL,
     TimeMonth int unsigned NOT NULL,

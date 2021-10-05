@@ -1,4 +1,4 @@
-INSERT INTO transaction (
+INSERT INTO transactions (
     TransactionID,
     AccountID,
     TimeMonth,
