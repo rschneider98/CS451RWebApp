@@ -6,7 +6,7 @@ Identify users of our services.
 | Field | Type | Other |
 | -- | -- | -- |
 | Email | string(320) | Primary Key |
-| UserID | unsigned int(255) | Indexed |
+| UserID | unsigned int | Indexed |
 | FirstName | string(50) | NA |
 | LastName | string(50) | NA |
 | Salt | BINARY(20) | NA |
@@ -17,8 +17,12 @@ Tie our user information to protected information. This is a separate table to r
 
 | Field | Type | Other |
 | -- | -- | -- |
-| UserID | unsigned int(255) | Primary Key |
-| SSN | unsigned int(255) | NA |
+| UserID | unsigned int | Primary Key and Foreign Key |
+| AddressLine1 | varchar(100) | NA |
+| AddressLine2 | varchar(100) | NULLABLE |
+| City | varchar(100) | NA |
+| PostalState | varchar(2) | NA |
+| SSN | unsigned int | NA |
 
 ## NOTIFICATION
 This would define the types of notification rules users can select from, describe the rule for the user, and provide a function name that actually implements the queries.
@@ -29,50 +33,57 @@ This would define the types of notification rules users can select from, describ
 | Name | string(64) | NA |
 | Description | string(256) | NA |
 
-
 ## USER_NOTIFICATION
 This should include entries to enable notification functions for users.
 
 | Field | Type | Other |
 | -- | -- | -- |
-| UserID | unsigned int(255) | Primary Key |
+| UserID | unsigned int | Primary Key |
 | FnName | string(64) | NA |
-
 
 ## ACCOUNT
 This would tie our users to the accounts that they have ownership of.
 
 | Field | Type | Other |
 | -- | -- | -- |
-| AccountID | unsigned int(255) | Primary Key |
-| Type | string(320) | Enumerated Account Types |
-| UserID1 | unsigned int(255) | Indexed |
-| UserID2 | unsigned int(255) | Indexed |
-| UserID3 | unsigned int(255) | Indexed |
-| UserID4 | unsigned int(255) | Indexed |
-| UserID5 | unsigned int(255) | Indexed |
+| AccountID | unsigned int | Primary Key |
+| AccountType | int | Enumerated Account Types - Foreign Key |
+
+## ACCOUNT_TYPE
+This would tie our users to the accounts that they have ownership of.
+
+| Field | Type | Other |
+| -- | -- | -- |
+| AccountType | unsigned int | Primary Key |
+| TypeDescription | string(100) | NA |
 
 Possible account types:
 1. Checking
 2. Savings
 
-Business Rule: Only a maximum of five people can have access to the same account.
+## ACCOUNT_USER
+Relation Table for Accounts to Users
+Assumption: all users have same account access
+
+| Field | Type | Other |
+| -- | -- | -- |
+| AccountID | unsigned int | Primary Key |
+| UserID | unsigned int | Foreign Key |
 
 ## TRANSACTIONS
 This would tie accounts to indivdual transactions
 
 | Field | Type | Other |
 | -- | -- | -- |
-| TransactionID | unsigned int(255) | Primary Key |
-| AccountID | unsigned int(255) | Foreign Key |
-| Year | unsigned smallint(255) | NA |
-| Month | unsigned smallint(255) | NA |
-| Timestamp | VARCHAR(25) | NA |
-| Amount | DECIMAL(16, 2) | NA |
-| LocationAddress | VARCHAR(50) | NA |
-| LocationCity | VARCHAR(50) | NA |
-| LocationStCd | VARCHAR(2) | NA |
-| LocationCtnyCd | VARCHAR(5) | NA |
+| TransactionID | unsigned int | Primary Key |
+| AccountID | unsigned int | Foreign Key |
+| TimeYear | unsigned smallint | NA |
+| TimeMonth | unsigned smallint | NA |
+| TimeDay | unsigned smallint | NA |
+| AmountDollars | int | NA |
+| AmountCents | int | NA |
+| LocationStCd | varchar(2) | NA |
+| CountryCd | varchar(2) | NA |
 | Vendor | VARCHAR(100) | Foreign Key |
 
 ## CATEGORY
@@ -80,8 +91,8 @@ List and description of transaction categories
 
 | Field | Type | Other |
 | -- | -- | -- |
-| Category | unsigned int(255) | Primary Key |
-| Description | VARCHAR(255) | NA |
+| Category | unsigned int | Primary Key |
+| Description | VARCHAR | NA |
 
 ## VENDOR_CAT
 Tie vendors to transaction categories
@@ -89,4 +100,23 @@ Tie vendors to transaction categories
 | Field | Type | Other |
 | -- | -- | -- |
 | Vendor | VARCHAR(100) | Primary Key |
-| Category | unsigned int(255) | NA |
+| Category | unsigned int | NA |
+
+## ADMIN
+Identify accounts with write access for accounts and transactions.
+
+| Field | Type | Other |
+| -- | -- | -- |
+| AdminID | unsigned int | Primary Key |
+| Salt | BINARY(20) | NA |
+| Password | BLOB(512) | NA |
+
+## Account_Tokens
+Identify token aliases given to client to reference an account.
+
+| Field | Type | Other |
+| -- | -- | -- |
+| UserID | unsigned int | Composite Primary Key |
+| Token | unsigned int | Composite Primary Key AUTO-INCREMENT |
+| AccountID | unsigned int | Foreign Key |
+| TimeStamp | ts | DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP |
