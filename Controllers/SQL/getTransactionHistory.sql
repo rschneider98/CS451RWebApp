@@ -5,5 +5,5 @@ ORDER BY
     TimeYear DESC, 
     TimeMonth DESC,
     TimeDay DESC,
-    TransactionID ASC
+    TransactionID DESC
 LIMIT @START_ROW,@NUM_ROWS;

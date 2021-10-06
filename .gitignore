@@ -36,6 +36,7 @@ TestResults/
 ####################
 **/__pycache__/
 **/*.ipynb
+.venv/*
 
 ###################
 # Web publish log #
