@@ -28,7 +28,6 @@ namespace CS451RWebApp.Controllers
             {
                 return true;
             }
-
             return !list.Any();
         }
 
@@ -54,14 +53,16 @@ namespace CS451RWebApp.Controllers
             }
         }
 
-        public class RequestID
+        public class RequestTransactionHistory
         {
             public string ID { get; set; }
+            public int PageSize { get; set; }
+            public int PageNumber { get; set; }
         }
 
         [HttpPost]
         [Route("api/getTransactionHistory")]
-        public async Task<ActionResult> GetAsyncTransactionHistory([FromBody] RequestID body) 
+        public async Task<ActionResult> GetAsyncTransactionHistory([FromBody] RequestTransactionHistory body) 
         {
             string connString = this._configuration.GetConnectionString("localDB");
             TransactionHistory history = new TransactionHistory();
@@ -72,7 +73,7 @@ namespace CS451RWebApp.Controllers
                 using var conn = new MySqlConnection(connString);
 
                 //retrieve the SQL Server instance version
-                string filePath = $"sql{Path.DirectorySeparatorChar}getTransactionHistory.sql";
+                string filePath = string.Join(Path.DirectorySeparatorChar, new List<string> { "Controllers", "SQL", "getTransactionHistory.sql" });
                 string query = System.IO.File.ReadAllText(filePath);
 
                 //open connection
@@ -81,10 +82,12 @@ namespace CS451RWebApp.Controllers
                 //define the SqlCommand object and execute
                 using var cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@ID", body.ID);
+                cmd.Parameters.AddWithValue("@START_ROW", body.PageSize * body.PageNumber);
+                cmd.Parameters.AddWithValue("@NUM_ROWS", body.PageSize * (1 + body.PageNumber));
 
                 // using var cmd = new MySqlCommand(query, conn);
                 using var reader = await cmd.ExecuteReaderAsync();
-                _logger.LogInformation(string.Format("Retrieving TransactionHistory for ID={0} from database.", body.ID));
+                _logger.LogInformation(string.Format("Retrieving TransactionHistory for AccountID={0} from database.", body.ID));
 
                 //check if there are records
                 while (await reader.ReadAsync())
@@ -107,14 +110,17 @@ namespace CS451RWebApp.Controllers
             catch (Exception e)
             {
                 _logger.LogError(e.Message);
+                // StatusCode: 500
                 return Problem("Error accessing database, contact site admin for more info");
             }
 
             if (IsEmpty(history.Transactions))
             {
-                return NotFound(string.Format("Account {0} does not exist", body.ID));
+                // Account does not exist (StatusCode: 204)
+                return NoContent();
             }
 
+            // StatusCode: 200
             return Ok(history);
         }
     }
