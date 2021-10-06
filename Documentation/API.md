@@ -149,25 +149,6 @@ All Inputs are expected to be JSON and all outputs are JSON objects.
             ]
         }
         ```
-- `deleteTransaction` **[POST]**
-    - NOTE: **Requires Admin Access**
-    - Parameters
-        - int `ID`: TransactionID to remove
-    - Returns: Updated Account (with Balance)
-        ```
-        {
-            "accountID": int,
-            "accountType": string,
-            "currentBalanceDollars": int,
-            "currentBalanceCents": int,
-            "users": [
-                {"userID": int,
-                "email": string,
-                "firstName": string,
-                "lastName": string}, ...
-            ]
-        }
-        ```
 - `deleteUser` **[POST]**
     - NOTEs: 
         - **Requires Admin Access**
