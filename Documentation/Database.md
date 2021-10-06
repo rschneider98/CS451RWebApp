@@ -71,7 +71,7 @@ Assumption: all users have same account access
 | UserID | unsigned int | Foreign Key |
 
 ## TRANSACTIONS
-This would tie accounts to indivdual transactions
+This would tie accounts to individual transactions
 
 | Field | Type | Other |
 | -- | -- | -- |
@@ -82,6 +82,8 @@ This would tie accounts to indivdual transactions
 | TimeDay | unsigned smallint | NA |
 | AmountDollars | int | NA |
 | AmountCents | int | NA |
+| EndBalanceDollars | int | NA |
+| EndBalanceCents | int | NA |
 | LocationStCd | varchar(2) | NA |
 | CountryCd | varchar(2) | NA |
 | Vendor | VARCHAR(100) | Foreign Key |
