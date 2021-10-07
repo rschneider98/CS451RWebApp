@@ -8,27 +8,18 @@ using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Mvc;
 using MySqlConnector;
 
-namespace CS451RWebApp.Controllers 
+namespace src.Controllers.API
 {
     [ApiController]
-    public class BackendController : ControllerBase
+    public class GetTransactionHistoryController : ControllerBase
     {
         private readonly IConfiguration _configuration;
         private readonly ILogger _logger;
 
-        public BackendController(IConfiguration configuration, ILogger<BackendController> logger)
+        public GetTransactionHistoryController(IConfiguration configuration, ILogger<GetTransactionHistoryController> logger)
         {
             _configuration = configuration;
             _logger = logger;
-        }
-
-        public static bool IsEmpty<T>(List<T> list)
-        {
-            if (list == null)
-            {
-                return true;
-            }
-            return !list.Any();
         }
 
         private class Transaction
@@ -73,7 +64,7 @@ namespace CS451RWebApp.Controllers
                 using var conn = new MySqlConnection(connString);
 
                 //retrieve the SQL Server instance version
-                string filePath = string.Join(Path.DirectorySeparatorChar, new List<string> { "Controllers", "SQL", "getTransactionHistory.sql" });
+                string filePath = string.Join(Path.DirectorySeparatorChar, new List<string> { "Controllers", "API", "SQL", "getTransactionHistory.sql" });
                 string query = System.IO.File.ReadAllText(filePath);
 
                 //open connection
@@ -114,7 +105,7 @@ namespace CS451RWebApp.Controllers
                 return Problem("Error accessing database, contact site admin for more info");
             }
 
-            if (IsEmpty(history.Transactions))
+            if (Helpers.IsEmpty(history.Transactions))
             {
                 // Account does not exist (StatusCode: 204)
                 return NoContent();
