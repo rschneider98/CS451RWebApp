@@ -74,7 +74,7 @@ namespace src.Controllers.API
                 using var cmd = new MySqlCommand(query, conn);
                 cmd.Parameters.AddWithValue("@ID", body.ID);
                 cmd.Parameters.AddWithValue("@START_ROW", body.PageSize * body.PageNumber);
-                cmd.Parameters.AddWithValue("@NUM_ROWS", body.PageSize * (1 + body.PageNumber));
+                cmd.Parameters.AddWithValue("@NUM_ROWS", body.PageSize);
 
                 // using var cmd = new MySqlCommand(query, conn);
                 using var reader = await cmd.ExecuteReaderAsync();
