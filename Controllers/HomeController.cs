@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using CS451RWebApp.Models;
 
-namespace CS451RWebApp.Controllers
+namespace src.Controllers
 {
     public class HomeController : Controller
     {
