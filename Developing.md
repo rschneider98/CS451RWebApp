@@ -28,14 +28,29 @@ This guide uses venv, which is now a standard package of python. Any method work
 6. In your virtual environment, install your packages: `python -m pip install -r requirements.txt`
 7. Verify the installed packages: `python -m pip freeze`
 
+#### App Settings
+The file `appsettings.Development.json` should be added to the project root. It should look like this:
+```
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft": "Warning",
+      "Microsoft.Hosting.Lifetime": "Information"
+    }
+  },
+  "ConnectionStrings": {
+    "localDB": "server=localhost;database=banking;uid=USERNAME;pwd=PASSWORD;"
+  }
+}
+```
+
 #### Development Database
 For MySQL this guide assumes you have installed it and set up a root account or user with necessary access (since this is a local development environment, the security of an account is not super significant). 
 
-You will need to update the connection string in the appsettings.Development.json file. Mostly likily, the connection string will require renaming the server to `localhost` and filling in the username and password. Since you do not want your database password to be public, the Developing appsettings is excluded for git using the .gitignore file. This can be overruled if some other configuration needs to be added, but remember to put the dummy authenication variables back.
+You will need to update the connection string in the appsettings.Development.json file. Mostly likily, the connection string will require renaming the server to `localhost` and filling in the username and password. Since you do not want your database password to be public, the Developing appsettings is excluded for git using the .gitignore file. If the appsettings format needs to be updated, do so in the [App Settings section](#App-Settings)
 
-To have git ingore the appsettings file, you can run `git update-index --skip-worktree appsettings.Development.json` and if you ever need to update the file you can undo the ignore by running `git update-index --no-skip-worktree appsettings.Development.json`.
-
-Once you have MySQL and Python installed and your connection string updated, you can run the python script `database/db_setup.py` to create the development database.
+Once you have MySQL and Python installed and your connection string updated, you can run the python script  to create the development database: `python database/db_setup.py`.
 
 ## Running Tests
 To run the tests, have your workstation environment configured, then run `pytest`.
